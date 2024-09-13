@@ -6,7 +6,9 @@ final currencyFormatter = NumberFormat.simpleCurrency();
 
 class BudgetTile extends StatefulWidget {
   final Budget budget;
-  const BudgetTile({super.key, required this.budget});
+  final Function() callback;
+
+  const BudgetTile({super.key, required this.budget, required this.callback});
 
   @override
   State<StatefulWidget> createState() => _BudgetTile();
@@ -15,7 +17,9 @@ class BudgetTile extends StatefulWidget {
 class _BudgetTile extends State<BudgetTile> {
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
+        width: 200,
+        height: 200,
         color: Colors.blueGrey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -34,5 +38,6 @@ class _BudgetTile extends State<BudgetTile> {
     setState(() {
       widget.budget.remaining -= cost;
     });
+    widget.callback();
   }
 }

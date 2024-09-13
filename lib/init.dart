@@ -1,8 +1,7 @@
-import 'package:ezbudget/budgets_view.dart';
+import 'package:ezbudget/budget.dart';
+import 'package:ezbudget/main_view.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import 'budget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,19 +24,6 @@ List<Budget> myBudgets = [
   Budget("Test Budget 1", 101.23),
   Budget("Test Budget 2", 102.45),
   Budget("Test Budget 3", 103.67),
-  Budget("Test Budget 4", 104.89),
-  Budget("Test Budget 5", 105.00),
-  Budget("Test Budget 6", 106.45),
-  Budget("Test Budget 7", 107.67),
-  Budget("Test Budget 8", 108.89),
-  Budget("Test Budget 9", 109.00),
-  Budget("Test Budget 10", 110.45),
-  Budget("Test Budget 11", 111.67),
-  Budget("Test Budget 12", 112.89),
-  Budget("Test Budget 13", 113.00),
-  Budget("Test Budget 14", 114.45),
-  Budget("Test Budget 15", 115.67),
-  Budget("Test Budget 16", 116.89),
 ];
 
 class _MyAppState extends State<MyApp> {
@@ -53,7 +39,7 @@ class _MyAppState extends State<MyApp> {
               scrolledUnderElevation: 0.2,
               toolbarHeight: 50,
             ),
-            body: BudgetsView(budgets: myBudgets)));
+            body: MainView(budgets: myBudgets)));
   }
 }
 
