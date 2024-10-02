@@ -20,10 +20,10 @@ class _MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        Center(
-            child: Column(children: [
+    return Scaffold(
+      appBar: AppBar(title: const Text("ezBudget")),
+      body: Center(
+        child: Column(children: [
           const Text("YOUR REMAINING BUDGET"),
           Text(
             currencyFormatter.format(totalRemainingBudget),
@@ -31,21 +31,28 @@ class _MainViewState extends State<MainView> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          GridView.extent(
-            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-            shrinkWrap: true,
-            maxCrossAxisExtent: 200,
-            mainAxisSpacing: 15,
-            crossAxisSpacing: 15,
-            children: widget.budgets
-                .map((e) => BudgetTile(
-                      budget: e,
-                      callback: updateRemainingBudget,
-                    ))
-                .toList(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: GridView.extent(
+                physics: const ScrollPhysics(),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                shrinkWrap: true,
+                maxCrossAxisExtent: 200,
+                mainAxisSpacing: 15,
+                crossAxisSpacing: 15,
+                children: widget.budgets
+                    .map((e) => BudgetTile(
+                          budget: e,
+                          updateTotalCallback: updateRemainingBudget,
+                        ))
+                    .toList(),
+              ),
+            ),
           ),
-        ]))
-      ],
+        ]),
+      ),
+      
     );
   }
 
