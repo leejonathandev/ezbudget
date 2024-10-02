@@ -24,6 +24,10 @@ List<Budget> myBudgets = [
   Budget("Test Budget 1", 101.23),
   Budget("Test Budget 2", 102.45),
   Budget("Test Budget 3", 103.67),
+  Budget("Test Budget 2", 102.45),
+  Budget("Test Budget 3", 103.67),
+  Budget("Test Budget 2", 102.45),
+  Budget("Test Budget 3", 103.67),
 ];
 
 class _MyAppState extends State<MyApp> {
