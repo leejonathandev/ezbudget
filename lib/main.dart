@@ -22,13 +22,11 @@ class MyApp extends StatefulWidget {
 }
 
 List<Budget> myBudgets = [
-  Budget("Test Budget 1", 101.23),
-  Budget("Test Budget 2", 102.45),
-  Budget("Test Budget 3", 103.67),
-  Budget("Test Budget 2", 102.45),
-  Budget("Test Budget 3", 103.67),
-  Budget("Test Budget 2", 102.45),
-  Budget("Test Budget 3", 103.67),
+  Budget("Groceries", 200),
+  Budget("Dining Out", 150),
+  Budget("Gas", 100),
+  Budget("Clothing", 50),
+  Budget("Gifts", 100),
 ];
 
 class _MyAppState extends State<MyApp> {
@@ -36,7 +34,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(Object context) {
     String appTitle = "ezBudget";
     return MaterialApp(
-      title: "${appTitle}1",
+      title: appTitle,
       theme: myTheme,
       home: MainView(budgets: myBudgets),
       debugShowCheckedModeBanner: true,

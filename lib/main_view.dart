@@ -15,44 +15,30 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
+  bool useWideLayout = true;
   late double totalRemainingBudget =
       widget.budgets.map((e) => e.remaining).reduce((a, b) => a + b);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("ezBudget")),
-      body: Center(
-        child: Column(children: [
-          const Text("YOUR REMAINING BUDGET"),
-          Text(
-            currencyFormatter.format(totalRemainingBudget),
-            textScaler: const TextScaler.linear(4),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: SingleChildScrollView(
-              child: GridView.extent(
-                physics: const ScrollPhysics(),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-                shrinkWrap: true,
-                maxCrossAxisExtent: 200,
-                mainAxisSpacing: 15,
-                crossAxisSpacing: 15,
-                children: widget.budgets
-                    .map((e) => BudgetTile(
-                          budget: e,
-                          updateTotalCallback: updateRemainingBudget,
-                        ))
-                    .toList(),
-              ),
-            ),
-          ),
-        ]),
-      ),
-      
+      appBar: AppBar(title: const Text("ezBudget"), actions: [
+        IconButton(
+            onPressed: toggleBudgetLayout, icon: const Icon(Icons.swap_horiz))
+      ]),
+      body: Column(children: [
+        const SizedBox(height: 20),
+        const Text("TOTAL REMAINING BUDGET"),
+        Text(
+          currencyFormatter.format(totalRemainingBudget),
+          textScaler: const TextScaler.linear(4),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 20),
+        Expanded(
+          child: buildBudgetLayout(useWideLayout),
+        )
+      ]),
     );
   }
 
@@ -61,5 +47,49 @@ class _MainViewState extends State<MainView> {
       totalRemainingBudget =
           widget.budgets.map((e) => e.remaining).reduce((a, b) => a + b);
     });
+  }
+
+  void toggleBudgetLayout() {
+    setState(() {
+      useWideLayout = !useWideLayout;
+    });
+  }
+
+  Widget buildBudgetLayout([bool useWideLayout = true]) {
+    if (useWideLayout) {
+      // convert to ListView.builder
+      return ListView.separated(
+        separatorBuilder: (BuildContext context, int index) => const SizedBox(
+          height: 10,
+        ),
+        padding: const EdgeInsets.all(15),
+        itemCount: widget.budgets.length,
+        itemBuilder: (context, index) {
+          return BudgetTile(
+            budget: widget.budgets[index],
+            updateTotalCallback: updateRemainingBudget,
+            useWideLayout: useWideLayout,
+          );
+        },
+      );
+    } else {
+      // convert to GridView.builder
+      return GridView.builder(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 400,
+          mainAxisSpacing: 15,
+          crossAxisSpacing: 15,
+        ),
+        padding: const EdgeInsets.all(15),
+        itemCount: widget.budgets.length,
+        itemBuilder: (context, index) {
+          return BudgetTile(
+            budget: widget.budgets[index],
+            updateTotalCallback: updateRemainingBudget,
+            useWideLayout: false,
+          );
+        },
+      );
+    }
   }
 }
