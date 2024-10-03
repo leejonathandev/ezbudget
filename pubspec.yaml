@@ -88,3 +88,33 @@ flutter:
     #
     # For details regarding fonts from package dependencies,
     # see https://flutter.dev/custom-fonts/#from-packages
+    fonts:
+      - family: Ubuntu
+        fonts:
+          - asset: assets/fonts/Ubuntu-Regular.ttf
+            style: normal
+            weight: 400
+          - asset: assets/fonts/Ubuntu-Bold.ttf
+            style: normal
+            weight: 700
+          - asset: assets/fonts/Ubuntu-Italic.ttf
+            style: italic
+            weight: 400
+          - asset: assets/fonts/Ubuntu-BoldItalic.ttf
+            style: italic
+            weight: 700
+          - asset: assets/fonts/Ubuntu-Light.ttf
+            style: normal
+            weight: 300
+          - asset: assets/fonts/Ubuntu-LightItalic.ttf
+            style: italic
+            weight: 300
+          - asset: assets/fonts/Ubuntu-Medium.ttf
+            style: normal
+            weight: 500
+          - asset: assets/fonts/Ubuntu-MediumItalic.ttf
+            style: italic
+            weight: 500
+
+
+          

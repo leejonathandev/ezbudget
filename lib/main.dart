@@ -1,14 +1,13 @@
 import 'package:ezbudget/budget.dart';
 import 'package:ezbudget/main_view.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 ThemeData myTheme = ThemeData(
-  fontFamily: GoogleFonts.ubuntu().fontFamily,
+  fontFamily: "Ubuntu",
   useMaterial3: true,
   colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.blueGrey, brightness: Brightness.dark),

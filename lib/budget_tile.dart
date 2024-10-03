@@ -33,11 +33,12 @@ class _BudgetTile extends State<BudgetTile> {
             onTap: () => spendMoney(10),
             child: Column(
               children: [
+                const SizedBox(height: 5),
                 Text(widget.budget.label,
                     style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text(
                     " ${currencyFormatter.format(widget.budget.remaining)} / ${currencyFormatter.format(widget.budget.total)} "),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
                 LinearProgressIndicator(
                   minHeight: 10,
                   value: widget.budget.getPercentageRemaining(),

@@ -1,5 +1,6 @@
 import 'package:ezbudget/budget.dart';
 import 'package:ezbudget/budget_tile.dart';
+import 'package:ezbudget/create_budget_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -42,19 +43,6 @@ class _MainViewState extends State<MainView> {
     );
   }
 
-  void updateRemainingBudget() {
-    setState(() {
-      totalRemainingBudget =
-          widget.budgets.map((e) => e.remaining).reduce((a, b) => a + b);
-    });
-  }
-
-  void toggleBudgetLayout() {
-    setState(() {
-      useWideLayout = !useWideLayout;
-    });
-  }
-
   Widget buildBudgetLayout([bool useWideLayout = true]) {
     if (useWideLayout) {
       // convert to ListView.builder
@@ -63,13 +51,49 @@ class _MainViewState extends State<MainView> {
           height: 10,
         ),
         padding: const EdgeInsets.all(15),
-        itemCount: widget.budgets.length,
+        itemCount: widget.budgets.length + 1,
         itemBuilder: (context, index) {
-          return BudgetTile(
-            budget: widget.budgets[index],
-            updateTotalCallback: updateRemainingBudget,
-            useWideLayout: useWideLayout,
-          );
+          if (index < widget.budgets.length) {
+            return BudgetTile(
+              budget: widget.budgets[index],
+              updateTotalCallback: updateRemainingBudget,
+              useWideLayout: useWideLayout,
+            );
+          } else {
+            /*
+            This below is the code for the extra tile 
+            at the bottom of the screen to add another budget.
+            */
+            return SizedBox(
+              child: Card(
+                // Styling for the card
+                color: Color.lerp(
+                    Theme.of(context).primaryColor, Colors.white, 0.1),
+                clipBehavior: Clip.hardEdge,
+                child: InkWell(
+                  // This is what changes the screen
+                  // when you press the button
+                  onTap: () => {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CreateBudgetView()),
+                    )
+                  },
+                  // This is for the icon in the middle
+                  child: const Padding(
+                    padding: EdgeInsets.all(5),
+                    child: Center(
+                      child: Icon(
+                          size: 50,
+                          color: Colors.white24,
+                          Icons.add_circle_outline),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
         },
       );
     } else {
@@ -91,5 +115,18 @@ class _MainViewState extends State<MainView> {
         },
       );
     }
+  }
+
+  void updateRemainingBudget() {
+    setState(() {
+      totalRemainingBudget =
+          widget.budgets.map((e) => e.remaining).reduce((a, b) => a + b);
+    });
+  }
+
+  void toggleBudgetLayout() {
+    setState(() {
+      useWideLayout = !useWideLayout;
+    });
   }
 }
