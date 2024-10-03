@@ -23,10 +23,25 @@ class _MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("ezBudget"), actions: [
-        IconButton(
-            onPressed: toggleBudgetLayout, icon: const Icon(Icons.swap_horiz))
-      ]),
+      appBar: AppBar(
+        title: const Text("ezBudget"),
+        actions: [
+          IconButton(
+            onPressed: toggleBudgetLayout,
+            icon: const Icon(Icons.swap_horiz),
+          ),
+          IconButton(
+            onPressed: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const CreateBudgetView()),
+              )
+            },
+            icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
       body: Column(children: [
         const SizedBox(height: 20),
         const Text("TOTAL REMAINING BUDGET"),
