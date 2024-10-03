@@ -40,6 +40,11 @@ class _BudgetTile extends State<BudgetTile> {
                     " ${currencyFormatter.format(widget.budget.remaining)} / ${currencyFormatter.format(widget.budget.total)} "),
                 const SizedBox(height: 5),
                 LinearProgressIndicator(
+                  color: Color.lerp(
+                      const Color(0xFFFFFFFF),
+                      const Color(0xFF45AAED),
+                      widget.budget.getPercentageRemaining()),
+                  backgroundColor: Colors.blueGrey,
                   minHeight: 10,
                   value: widget.budget.getPercentageRemaining(),
                 ),
