@@ -2,6 +2,7 @@ import 'package:ezbudget/budget.dart';
 import 'package:ezbudget/budget_tile.dart';
 import 'package:ezbudget/create_budget_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 final currencyFormatter = NumberFormat.simpleCurrency();
@@ -35,7 +36,9 @@ class _MainViewState extends State<MainView> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const CreateBudgetView()),
+                    builder: (context) => CreateBudgetView(
+                          budgets: widget.budgets,
+                        )),
               )
             },
             icon: const Icon(Icons.add),
@@ -88,13 +91,12 @@ class _MainViewState extends State<MainView> {
                 child: InkWell(
                   // This is what changes the screen
                   // when you press the button
-                  onTap: () => {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const CreateBudgetView()),
-                    )
-                  },
+                  onTap: () => showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => CreateBudgetDialog(
+                        budgets: widget.budgets,
+                        refreshBudgetsCallback: updateRemainingBudget),
+                  ),
                   // This is for the icon in the middle
                   child: const Padding(
                     padding: EdgeInsets.all(5),
@@ -143,5 +145,70 @@ class _MainViewState extends State<MainView> {
     setState(() {
       useWideLayout = !useWideLayout;
     });
+  }
+}
+
+class CreateBudgetDialog extends StatefulWidget {
+  final List<Budget> budgets;
+  final Function() refreshBudgetsCallback;
+
+  const CreateBudgetDialog(
+      {super.key, required this.budgets, required this.refreshBudgetsCallback});
+
+  @override
+  State<StatefulWidget> createState() => _CreateBudgetDialogState();
+}
+
+class _CreateBudgetDialogState extends State<CreateBudgetDialog> {
+  final budgetNameInputController = TextEditingController();
+  final budgetAmountInputController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Create Budget"),
+      content:
+          // A Form ancestor is not required. The Form simply makes it
+          // easier to save, reset, or validate multiple fields at once.
+          Form(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: budgetNameInputController,
+              decoration: const InputDecoration(labelText: "Budget Name"),
+              inputFormatters: [
+                FilteringTextInputFormatter.singleLineFormatter
+              ],
+            ),
+            TextFormField(
+              controller: budgetAmountInputController,
+              decoration: const InputDecoration(labelText: "Budget Amount"),
+              inputFormatters: [
+                FilteringTextInputFormatter.singleLineFormatter
+              ],
+              keyboardType: TextInputType.number,
+            ),
+            ElevatedButton(
+              onPressed: () => {
+                widget.budgets.add(Budget(budgetNameInputController.text,
+                    double.parse(budgetAmountInputController.text))),
+                widget.refreshBudgetsCallback(),
+                Navigator.pop(context, "create-action")
+              },
+              child: const Text("Create"),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    budgetNameInputController.dispose();
+    budgetAmountInputController.dispose();
+    super.dispose();
   }
 }
