@@ -9,6 +9,13 @@ void main() {
 ThemeData myTheme = ThemeData(
   fontFamily: "Ubuntu",
   useMaterial3: true,
+  pageTransitionsTheme: const PageTransitionsTheme(
+    builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.android: ZoomPageTransitionsBuilder(
+        allowEnterRouteSnapshotting: false,
+      ),
+    },
+  ),
   colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.blueGrey, brightness: Brightness.dark),
 );
@@ -20,13 +27,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-List<Budget> myBudgets = [
-  Budget("Groceries", 200),
-  Budget("Dining Out", 150),
-  Budget("Gas", 100),
-  Budget("Clothing", 50),
-  Budget("Gifts", 100),
-];
+List<Budget> myBudgets = [];
 
 class _MyAppState extends State<MyApp> {
   @override

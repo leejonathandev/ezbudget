@@ -1,5 +1,6 @@
 // ignore_for_file: unnecessary_const
 
+import 'package:ezbudget/spend_view.dart';
 import 'package:flutter/material.dart';
 import 'package:ezbudget/budget.dart';
 import 'package:intl/intl.dart';
@@ -30,7 +31,16 @@ class _BudgetTile extends State<BudgetTile> {
           color: Colors.blueGrey,
           clipBehavior: Clip.hardEdge,
           child: InkWell(
-            onTap: () => spendMoney(10),
+            onTap: () => {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SpendView(
+                      selectedBudget: widget.budget,
+                      updateTotalCallback: widget.updateTotalCallback,
+                    ),
+                  )),
+            },
             child: Column(
               children: [
                 const SizedBox(height: 5),
