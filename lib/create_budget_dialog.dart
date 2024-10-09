@@ -1,4 +1,5 @@
 import 'package:ezbudget/budget.dart';
+import 'package:ezbudget/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -52,7 +53,7 @@ class _CreateBudgetDialogState extends State<CreateBudgetDialog> {
                 FilteringTextInputFormatter.singleLineFormatter
               ],
               validator: (value) {
-                if (value == null || value.isEmpty) {
+                if (value == null || value.isEmpty || !isNumeric(value)) {
                   return 'pls i need LIMIIT!!';
                 }
                 return null;

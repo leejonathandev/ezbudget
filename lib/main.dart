@@ -1,9 +1,11 @@
 import 'package:ezbudget/budget.dart';
+import 'package:ezbudget/budget_storage.dart';
 import 'package:ezbudget/main_view.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  final List<Budget> budgets = await BudgetStorage.initializeBudgets();
+  runApp(MyApp(budgets: budgets));
 }
 
 ThemeData myTheme = ThemeData(
@@ -21,13 +23,13 @@ ThemeData myTheme = ThemeData(
 );
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final List<Budget> budgets;
+
+  const MyApp({super.key, required this.budgets});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
-
-List<Budget> myBudgets = [];
 
 class _MyAppState extends State<MyApp> {
   @override
@@ -36,7 +38,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: appTitle,
       theme: myTheme,
-      home: MainView(budgets: myBudgets),
+      home: MainView(budgets: widget.budgets),
       debugShowCheckedModeBanner: true,
     );
   }

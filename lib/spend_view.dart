@@ -1,5 +1,6 @@
 import 'package:ezbudget/budget.dart';
 import 'package:flutter/material.dart';
+import 'package:ezbudget/helpers.dart';
 
 class SpendView extends StatefulWidget {
   final Budget selectedBudget;
@@ -37,7 +38,7 @@ class _SpendViewState extends State<SpendView> {
                 decoration: const InputDecoration(labelText: "Amount Spent"),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value == null || value.isEmpty || !isNumeric(value)) {
                     return 'how much did you SPEENND!?';
                   }
                   return null;

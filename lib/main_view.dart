@@ -1,4 +1,5 @@
 import 'package:ezbudget/budget.dart';
+import 'package:ezbudget/budget_storage.dart';
 import 'package:ezbudget/budget_tile.dart';
 import 'package:ezbudget/create_budget_dialog.dart';
 import 'package:flutter/material.dart';
@@ -122,6 +123,7 @@ class _MainViewState extends State<MainView> {
   }
 
   void updateRemainingBudget() {
+    BudgetStorage.writeAllBudgets(widget.budgets);
     setState(() {
       totalRemainingBudget =
           widget.budgets.map((e) => e.remaining).reduce((a, b) => a + b);
