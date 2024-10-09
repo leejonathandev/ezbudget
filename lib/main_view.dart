@@ -122,6 +122,10 @@ class _MainViewState extends State<MainView> {
     }
   }
 
+  /// This method updates the total remaining budget.
+  /// It is called whenever a budget is updated.
+  /// It updates the total remaining budget by adding the remaining amount of each budget.
+  /// It then updates the state of the widget to reflect the new total remaining budget.
   void updateRemainingBudget() {
     BudgetStorage.writeAllBudgets(widget.budgets);
     setState(() {
