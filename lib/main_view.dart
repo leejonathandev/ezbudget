@@ -8,18 +8,30 @@ import 'package:intl/intl.dart';
 final currencyFormatter = NumberFormat.simpleCurrency();
 
 class MainView extends StatefulWidget {
-  final List<Budget> budgets;
-
   @override
   State<StatefulWidget> createState() => _MainViewState();
 
-  const MainView({super.key, required this.budgets});
+  const MainView({super.key});
 }
 
 class _MainViewState extends State<MainView> {
+  List<Budget> budgets = [];
+  double totalRemainingBudget = 0;
+
   bool useWideLayout = true;
-  late double totalRemainingBudget =
-      widget.budgets.fold<double>(0, (a, b) => a + b.remaining);
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the budgets from local storage.
+    BudgetStorage.initializeBudgets().then((value) {
+      setState(() {
+        budgets.addAll(value);
+        totalRemainingBudget =
+            budgets.fold<double>(0, (a, b) => a + b.remaining);
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,11 +69,11 @@ class _MainViewState extends State<MainView> {
           height: 10,
         ),
         padding: const EdgeInsets.all(15),
-        itemCount: widget.budgets.length + 1,
+        itemCount: budgets.length + 1,
         itemBuilder: (context, index) {
-          if (index < widget.budgets.length) {
+          if (index < budgets.length) {
             return BudgetTile(
-              budget: widget.budgets[index],
+              budget: budgets[index],
               updateTotalCallback: updateRemainingBudget,
               useWideLayout: useWideLayout,
             );
@@ -82,7 +94,7 @@ class _MainViewState extends State<MainView> {
                   onTap: () => showDialog<String>(
                     context: context,
                     builder: (BuildContext context) => CreateBudgetDialog(
-                        budgets: widget.budgets,
+                        budgets: budgets,
                         refreshBudgetsCallback: updateRemainingBudget),
                   ),
                   // This is for the icon in the middle
@@ -110,10 +122,10 @@ class _MainViewState extends State<MainView> {
           crossAxisSpacing: 15,
         ),
         padding: const EdgeInsets.all(15),
-        itemCount: widget.budgets.length,
+        itemCount: budgets.length,
         itemBuilder: (context, index) {
           return BudgetTile(
-            budget: widget.budgets[index],
+            budget: budgets[index],
             updateTotalCallback: updateRemainingBudget,
             useWideLayout: false,
           );
@@ -127,10 +139,10 @@ class _MainViewState extends State<MainView> {
   /// It updates the total remaining budget by adding the remaining amount of each budget.
   /// It then updates the state of the widget to reflect the new total remaining budget.
   void updateRemainingBudget() {
-    BudgetStorage.writeAllBudgets(widget.budgets);
+    BudgetStorage.writeAllBudgets(budgets);
     setState(() {
       totalRemainingBudget =
-          widget.budgets.map((e) => e.remaining).reduce((a, b) => a + b);
+          budgets.map((e) => e.remaining).reduce((a, b) => a + b);
     });
   }
 
