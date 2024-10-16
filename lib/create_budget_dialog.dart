@@ -45,6 +45,7 @@ class _CreateBudgetDialogState extends State<CreateBudgetDialog> {
                 }
                 return null;
               },
+              textCapitalization: TextCapitalization.words,
             ),
             TextFormField(
               controller: budgetAmountInputController,

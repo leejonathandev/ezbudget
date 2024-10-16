@@ -23,7 +23,7 @@ class _SpendViewState extends State<SpendView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Oh noes! How much monee gone?!'),
+        title: const Text('Oh noes! Monee gone?!'),
       ),
       body: Center(
         child: Form(
@@ -33,9 +33,15 @@ class _SpendViewState extends State<SpendView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
+                style: const TextStyle(fontSize: 40),
+                maxLines: 1,
+                enableSuggestions: false,
+                autocorrect: false,
+                autofocus: false,
                 textAlign: TextAlign.center,
                 controller: spentAmountInputController,
-                decoration: const InputDecoration(labelText: "Amount Spent"),
+                decoration: const InputDecoration(
+                    labelText: "Amount Spent", border: OutlineInputBorder()),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty || !isNumeric(value)) {
@@ -44,7 +50,7 @@ class _SpendViewState extends State<SpendView> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 50),
               ElevatedButton(
                 onPressed: () => {
                   if (_formKey.currentState!.validate())
@@ -56,7 +62,22 @@ class _SpendViewState extends State<SpendView> {
                       Navigator.pop(context),
                     }
                 },
-                child: const Text('Confirm Spent!'),
+                style: ButtonStyle(
+                  padding: WidgetStateProperty.all(
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                  backgroundColor: WidgetStateProperty.all(
+                    Theme.of(context).colorScheme.surfaceContainerHigh,
+                  ),
+                  foregroundColor: WidgetStateProperty.all(
+                    Theme.of(context).colorScheme.primaryFixed,
+                  ),
+                ),
+                child: const Text(
+                  'CONFIRM',
+                  style: TextStyle(fontSize: 22),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           ),
