@@ -18,8 +18,6 @@ class _MainViewState extends State<MainView> {
   List<Budget> budgets = [];
   double totalRemainingBudget = 0;
 
-  bool useWideLayout = true;
-
   @override
   void initState() {
     super.initState();
@@ -38,12 +36,6 @@ class _MainViewState extends State<MainView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("ezBudget"),
-        actions: [
-          IconButton(
-            onPressed: toggleBudgetLayout,
-            icon: const Icon(Icons.swap_horiz),
-          ),
-        ],
       ),
       body: Column(children: [
         const SizedBox(height: 20),
@@ -55,14 +47,18 @@ class _MainViewState extends State<MainView> {
         ),
         const SizedBox(height: 20),
         Expanded(
-          child: buildBudgetLayout(useWideLayout),
+          child: buildBudgetLayout(),
         )
       ]),
     );
   }
 
-  Widget buildBudgetLayout([bool useWideLayout = true]) {
-    if (useWideLayout) {
+  Widget buildBudgetLayout() {
+    // Use MediaQuery to determine the layout based on screen size
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWideScreen = screenWidth > 600; // threshold for wide layout
+
+    if (!isWideScreen) {
       // convert to ListView.builder
       return ListView.separated(
         separatorBuilder: (BuildContext context, int index) => const SizedBox(
@@ -75,7 +71,8 @@ class _MainViewState extends State<MainView> {
             return BudgetTile(
               budget: budgets[index],
               updateTotalCallback: updateRemainingBudget,
-              useWideLayout: useWideLayout,
+              useWideLayout: isWideScreen,
+              onDeleteBudget: deleteBudget,
             );
           } else {
             /*
@@ -117,18 +114,46 @@ class _MainViewState extends State<MainView> {
       // convert to GridView.builder
       return GridView.builder(
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 400,
-          mainAxisSpacing: 15,
-          crossAxisSpacing: 15,
+          maxCrossAxisExtent: 250, // Reduced from 400
+          mainAxisSpacing: 10, // Reduced from 15
+          crossAxisSpacing: 10, // Reduced from 15
+          childAspectRatio:
+              1.2, // Width:Height ratio (slightly wider than tall)
         ),
         padding: const EdgeInsets.all(15),
-        itemCount: budgets.length,
+        itemCount: budgets.length + 1,
         itemBuilder: (context, index) {
-          return BudgetTile(
-            budget: budgets[index],
-            updateTotalCallback: updateRemainingBudget,
-            useWideLayout: false,
-          );
+          if (index < budgets.length) {
+            return BudgetTile(
+              budget: budgets[index],
+              updateTotalCallback: updateRemainingBudget,
+              useWideLayout: true,
+              onDeleteBudget: deleteBudget,
+            );
+          } else {
+            return Card(
+              color:
+                  Color.lerp(Theme.of(context).primaryColor, Colors.white, 0.1),
+              clipBehavior: Clip.hardEdge,
+              child: InkWell(
+                onTap: () => showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) => CreateBudgetDialog(
+                      budgets: budgets,
+                      refreshBudgetsCallback: updateRemainingBudget),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(5),
+                  child: Center(
+                    child: Icon(
+                        size: 50,
+                        color: Colors.white24,
+                        Icons.add_circle_outline),
+                  ),
+                ),
+              ),
+            );
+          }
         },
       );
     }
@@ -146,9 +171,16 @@ class _MainViewState extends State<MainView> {
     });
   }
 
-  void toggleBudgetLayout() {
+  void deleteBudget(Budget budget) {
     setState(() {
-      useWideLayout = !useWideLayout;
+      budgets.remove(budget);
+      if (budgets.isNotEmpty) {
+        totalRemainingBudget =
+            budgets.map((e) => e.remaining).reduce((a, b) => a + b);
+      } else {
+        totalRemainingBudget = 0;
+      }
     });
+    BudgetStorage.writeAllBudgets(budgets);
   }
 }

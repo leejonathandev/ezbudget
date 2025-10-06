@@ -23,11 +23,15 @@ class _CreateBudgetDialogState extends State<CreateBudgetDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Create Budget"),
-      content:
-          // A Form ancestor is not required. The Form simply makes it
-          // easier to save, reset, or validate multiple fields at once.
-          Form(
+      title: const Text(
+        "Create Budget",
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+      content: Form(
         key: _formKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -35,48 +39,80 @@ class _CreateBudgetDialogState extends State<CreateBudgetDialog> {
           children: [
             TextFormField(
               controller: budgetNameInputController,
-              decoration: const InputDecoration(labelText: "Budget Name"),
+              decoration: InputDecoration(
+                labelText: "Budget Name",
+                border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surface,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.singleLineFormatter
               ],
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'pls gimee a NAMEE!!';
+                  return 'Please enter a budget name';
                 }
                 return null;
               },
               textCapitalization: TextCapitalization.words,
             ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: budgetAmountInputController,
-              decoration: const InputDecoration(labelText: "Budget Amount"),
+              decoration: InputDecoration(
+                labelText: "Budget Amount",
+                border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surface,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                prefixText: "\$ ",
+                hintText: "0.00",
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.singleLineFormatter
               ],
               validator: (value) {
-                if (value == null || value.isEmpty || !isNumeric(value)) {
-                  return 'pls i need LIMIIT!!';
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a budget amount';
+                }
+                if (!isNumeric(value)) {
+                  return 'Please enter a valid number';
                 }
                 return null;
               },
               keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => {
-                if (_formKey.currentState!.validate())
-                  {
-                    widget.budgets.add(
-                      Budget(
-                        budgetNameInputController.text,
-                        double.parse(budgetAmountInputController.text),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => {
+                  if (_formKey.currentState!.validate())
+                    {
+                      widget.budgets.add(
+                        Budget(
+                          budgetNameInputController.text,
+                          double.parse(budgetAmountInputController.text),
+                        ),
                       ),
-                    ),
-                    widget.refreshBudgetsCallback(),
-                    Navigator.pop(context, "create-action")
-                  },
-              },
-              child: const Text("Create"),
+                      widget.refreshBudgetsCallback(),
+                      Navigator.pop(context, "create-action")
+                    },
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: const Text("Create Budget"),
+              ),
             )
           ],
         ),
