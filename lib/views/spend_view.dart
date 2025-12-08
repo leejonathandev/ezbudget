@@ -1,6 +1,6 @@
-import 'package:ezbudget/budget.dart';
+import 'package:ezbudget/models/budget.dart';
 import 'package:flutter/material.dart';
-import 'package:ezbudget/helpers.dart';
+import 'package:ezbudget/utils/helpers.dart';
 
 class SpendView extends StatefulWidget {
   final Budget selectedBudget;
