@@ -1,3 +1,5 @@
+import 'package:ezbudget/models/deduction.dart';
+
 /// This is the Budget class.
 /// It contains the label, remaining amount, and total amount of the budget.
 /// It also has methods to reset the budget, spend money, and get the percentage remaining.
@@ -12,21 +14,25 @@ class Budget {
   String label;
   double remaining;
   double total;
+  List<Deduction> deductions;
 
   DateTime resetDate;
   ResetInterval resetInterval;
 
-  Budget(this.label, this.total, [double? remaining])
+  Budget(this.label, this.total, [double? remaining, List<Deduction>? deductions])
       : remaining = remaining ?? total,
+        deductions = deductions ?? [],
         resetDate = DateTime(DateTime.now().year, DateTime.now().month + 1),
         resetInterval = ResetInterval.monthly;
 
   void resetBudget() {
     remaining = total;
+    deductions = [];
   }
 
-  void spendMoney(double cost) {
-    remaining -= cost;
+  void spendMoney(double amount, [String? description]) {
+    remaining -= amount;
+    deductions.add(Deduction(description ?? "Unnamed Deduction", amount, DateTime.now()));
   }
 
   double getPercentageRemaining() {
@@ -71,6 +77,9 @@ class Budget {
       : label = json['label'] as String,
         remaining = json['remaining'] as double,
         total = json['total'] as double,
+        deductions = (json['deductions'] as List)
+            .map((d) => Deduction.fromJson(d))
+            .toList(),
         resetDate = DateTime.parse(json['resetDate'] as String),
         resetInterval = ResetInterval.values[json['resetInterval'] as int];
 
@@ -78,6 +87,7 @@ class Budget {
         'label': label,
         'remaining': remaining,
         'total': total,
+        'deductions': deductions.map((d) => d.toJson()).toList(),
         'resetDate': resetDate.toIso8601String(),
         'resetInterval': resetInterval.index,
       };

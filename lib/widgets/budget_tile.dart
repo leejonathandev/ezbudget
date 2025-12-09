@@ -33,17 +33,15 @@ class _BudgetTile extends State<BudgetTile> {
         color: Colors.blueGrey,
         clipBehavior: Clip.hardEdge,
         child: InkWell(
-          onTap: () => {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SpendView(
-                  selectedBudget: widget.budget,
-                  updateTotalCallback: widget.updateTotalCallback,
-                ),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SpendView(
+                selectedBudget: widget.budget,
+                updateTotalCallback: widget.updateTotalCallback,
               ),
             ),
-          },
+          ),
           onLongPress: () {
             showDialog(
               context: context,
@@ -135,16 +133,14 @@ class _BudgetTile extends State<BudgetTile> {
           color: Colors.blueGrey,
           clipBehavior: Clip.hardEdge,
           child: InkWell(
-            onTap: () => {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SpendView(
-                      selectedBudget: widget.budget,
-                      updateTotalCallback: widget.updateTotalCallback,
-                    ),
-                  )),
-            },
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SpendView(
+                    selectedBudget: widget.budget,
+                    updateTotalCallback: widget.updateTotalCallback,
+                  ),
+                )),
             onLongPress: () {
               showDialog(
                 context: context,

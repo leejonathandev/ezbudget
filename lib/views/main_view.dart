@@ -110,21 +110,37 @@ class _MainViewState extends State<MainView> {
                 ),
               ),
               Expanded(
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: useWideLayout ? 4 : 2,
-                    childAspectRatio: useWideLayout ? 1 : 1.5,
-                  ),
-                  itemCount: budgets.length,
-                  itemBuilder: (context, index) {
-                    return BudgetTile(
-                      budget: budgets[index],
-                      updateTotalCallback: _updateTotals,
-                      useWideLayout: useWideLayout,
-                      onDeleteBudget: _deleteBudget,
-                    );
-                  },
-                ),
+                child: useWideLayout
+                    ? GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          childAspectRatio: 1,
+                        ),
+                        itemCount: budgets.length,
+                        itemBuilder: (context, index) {
+                          return BudgetTile(
+                            budget: budgets[index],
+                            updateTotalCallback: _updateTotals,
+                            useWideLayout: useWideLayout,
+                            onDeleteBudget: _deleteBudget,
+                          );
+                        },
+                      )
+                    : ListView.builder(
+                        itemCount: budgets.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                            child: BudgetTile(
+                              budget: budgets[index],
+                              updateTotalCallback: _updateTotals,
+                              useWideLayout: useWideLayout,
+                              onDeleteBudget: _deleteBudget,
+                            ),
+                          );
+                        },
+                      ),
               ),
             ],
           );
