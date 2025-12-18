@@ -1,11 +1,11 @@
 // ignore_for_file: unnecessary_const
 
-import 'package:ezbudget/spend_view.dart';
+import 'package:ezbudget/views/spend_view.dart';
 import 'package:flutter/material.dart';
-import 'package:ezbudget/budget.dart';
+import 'package:ezbudget/models/budget.dart';
 import 'package:intl/intl.dart';
 
-final currencyFormatter = NumberFormat.simpleCurrency();
+final NumberFormat currencyFormatter = NumberFormat.simpleCurrency();
 
 class BudgetTile extends StatefulWidget {
   final Budget budget;
@@ -25,52 +25,6 @@ class BudgetTile extends StatefulWidget {
   State<StatefulWidget> createState() => _BudgetTile();
 }
 
-class _BudgetTile2 extends State<BudgetTile> {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      child: Card(
-        color: Colors.blueGrey,
-        clipBehavior: Clip.hardEdge,
-        child: InkWell(
-          onTap: () => {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SpendView(
-                  selectedBudget: widget.budget,
-                  updateTotalCallback: widget.updateTotalCallback,
-                ),
-              ),
-            ),
-          },
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Column(
-              children: [
-                Text(widget.budget.label),
-                Text('${widget.budget.getTimeRemaining().inDays}d left')
-              ],
-            ),
-            Column(children: [
-              Row(
-                children: [
-                  Text(widget.budget.remaining.toString(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 26,
-                      )),
-                  Text("/${widget.budget.total}"),
-                ],
-              ),
-            ]),
-          ]),
-        ),
-      ),
-    );
-  }
-}
-
 class _BudgetTile extends State<BudgetTile> {
   @override
   Widget build(BuildContext context) {
@@ -79,17 +33,15 @@ class _BudgetTile extends State<BudgetTile> {
         color: Colors.blueGrey,
         clipBehavior: Clip.hardEdge,
         child: InkWell(
-          onTap: () => {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SpendView(
-                  selectedBudget: widget.budget,
-                  updateTotalCallback: widget.updateTotalCallback,
-                ),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SpendView(
+                selectedBudget: widget.budget,
+                updateTotalCallback: widget.updateTotalCallback,
               ),
             ),
-          },
+          ),
           onLongPress: () {
             showDialog(
               context: context,
@@ -181,16 +133,14 @@ class _BudgetTile extends State<BudgetTile> {
           color: Colors.blueGrey,
           clipBehavior: Clip.hardEdge,
           child: InkWell(
-            onTap: () => {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SpendView(
-                      selectedBudget: widget.budget,
-                      updateTotalCallback: widget.updateTotalCallback,
-                    ),
-                  )),
-            },
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SpendView(
+                    selectedBudget: widget.budget,
+                    updateTotalCallback: widget.updateTotalCallback,
+                  ),
+                )),
             onLongPress: () {
               showDialog(
                 context: context,
@@ -251,7 +201,7 @@ class _BudgetTile extends State<BudgetTile> {
     }
   }
 
-  spendMoney(double cost) {
+  void spendMoney(double cost) {
     setState(() {
       widget.budget.spendMoney(cost);
     });

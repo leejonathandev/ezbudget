@@ -1,4 +1,4 @@
-import 'package:ezbudget/main_view.dart';
+import 'package:ezbudget/views/main_view.dart';
 import 'package:flutter/material.dart';
 
 void main() async {

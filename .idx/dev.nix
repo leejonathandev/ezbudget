@@ -1,8 +1,17 @@
 { pkgs }: {
   channel = "stable-24.05";
   packages = [
-    pkgs.jdk17
+    pkgs.jdk21
     pkgs.unzip
+    pkgs.firebase-tools # For Firebase CLI
+
+    # For Linux desktop builds
+    pkgs.clang
+    pkgs.cmake
+    pkgs.ninja
+    pkgs.pkg-config
+    pkgs.gtk3
+    pkgs.webkitgtk
   ];
   idx.extensions = [
     "Dart-Code.dart-code"

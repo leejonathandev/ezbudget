@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:ezbudget/budget.dart';
+import 'package:ezbudget/models/budget.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// This class is responsible for storing and retrieving budgets from local storage.
