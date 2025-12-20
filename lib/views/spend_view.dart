@@ -147,10 +147,10 @@ class _SpendViewState extends ConsumerState<SpendView> {
                 const SizedBox(height: 8),
                 Text(
                   currencyFormatter.format(widget.selectedBudget.remaining),
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green),
+                      color: Theme.of(context).colorScheme.primary),
                 ),
               ],
             ),
@@ -219,10 +219,11 @@ class _SpendViewState extends ConsumerState<SpendView> {
     final deductions = widget.selectedBudget.deductions;
 
     if (deductions.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No transactions yet.',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+          style: TextStyle(
+              fontSize: 16, color: Theme.of(context).colorScheme.outline),
         ),
       );
     }
@@ -238,8 +239,9 @@ class _SpendViewState extends ConsumerState<SpendView> {
             subtitle: Text(DateFormat.yMMMd().format(deduction.date)),
             trailing: Text(
               '- ${currencyFormatter.format(deduction.amount)}',
-              style: const TextStyle(
-                  color: Colors.red, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.bold),
             ),
           ),
         );

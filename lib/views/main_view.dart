@@ -149,7 +149,7 @@ class MainView extends ConsumerWidget {
 
   Widget _buildAddBudgetCard(BuildContext context) {
     return Card(
-      color: Colors.grey[850],
+      color: Theme.of(context).colorScheme.surfaceContainer,
       elevation: 0,
       clipBehavior: Clip.hardEdge,
       child: InkWell(
@@ -167,7 +167,7 @@ class MainView extends ConsumerWidget {
             child: Icon(
               Icons.add_circle_outline,
               size: 36,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.outline,
             ),
           ),
         ),

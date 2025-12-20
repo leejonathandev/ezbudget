@@ -64,10 +64,12 @@ class _BudgetTile extends ConsumerState<BudgetTile> {
                         },
                       ),
                       ListTile(
-                        leading: const Icon(Icons.delete, color: Colors.red),
-                        title: const Text(
+                        leading: Icon(Icons.delete,
+                            color: Theme.of(context).colorScheme.error),
+                        title: Text(
                           'Delete Budget',
-                          style: TextStyle(color: Colors.red),
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error),
                         ),
                         onTap: () {
                           widget.onDeleteBudget(widget.budget);
@@ -118,11 +120,11 @@ class _BudgetTile extends ConsumerState<BudgetTile> {
               ),
               LinearProgressIndicator(
                 color: Color.lerp(
-                  const Color(0xFFFFFFFF),
-                  const Color(0xFF45AAED),
+                  Theme.of(context).colorScheme.secondary,
+                  Theme.of(context).colorScheme.primary,
                   widget.budget.getPercentageRemaining(),
                 ),
-                backgroundColor: Colors.blueGrey[700],
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                 minHeight: 8,
                 value: widget.budget.getPercentageRemaining(),
               ),
@@ -166,10 +168,12 @@ class _BudgetTile extends ConsumerState<BudgetTile> {
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.delete, color: Colors.red),
-                          title: const Text(
+                          leading: Icon(Icons.delete,
+                              color: Theme.of(context).colorScheme.error),
+                          title: Text(
                             'Delete Budget',
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.error),
                           ),
                           onTap: () {
                             widget.onDeleteBudget(widget.budget);
