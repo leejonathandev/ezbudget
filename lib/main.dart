@@ -1,8 +1,9 @@
 import 'package:ezbudget/views/main_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 ThemeData myTheme = ThemeData(

@@ -1,92 +1,60 @@
-import 'dart:convert';
 import 'package:ezbudget/models/budget.dart';
+import 'package:ezbudget/providers/budget_provider.dart';
 import 'package:ezbudget/widgets/create_budget_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:ezbudget/widgets/budget_tile.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MainView extends StatefulWidget {
+class MainView extends ConsumerWidget {
   const MainView({
     super.key,
   });
 
   @override
-  State<MainView> createState() => _MainViewState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final budgetsAsync = ref.watch(budgetListProvider);
+    final totalBudget = ref.watch(totalBudgetProvider);
+    final totalRemaining = ref.watch(totalRemainingProvider);
 
-class _MainViewState extends State<MainView> {
-  List<Budget> budgets = [];
-  double totalBudget = 0;
-  double totalRemaining = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadBudgets();
+    return budgetsAsync.when(
+      data: (budgets) =>
+          _buildContent(context, ref, budgets, totalBudget, totalRemaining),
+      loading: () => Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "ezBudget",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stackTrace) => Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "ezBudget",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+          ),
+        ),
+        body: Center(child: Text('Error: $error')),
+      ),
+    );
   }
 
-  void _loadBudgets() async {
-    final prefs = await SharedPreferences.getInstance();
-    final budgetStrings = prefs.getStringList('budgets');
-
-    if (budgetStrings != null) {
-      budgets = budgetStrings.map((b) => Budget.fromJson(jsonDecode(b))).toList();
-    } else {
-      budgets = [
-        Budget("Groceries", 200),
-        Budget("Gas", 50),
-        Budget("Entertainment", 100)
-      ];
-    }
-    _updateTotals();
-    setState(() {});
-  }
-
-  void _saveBudgets() async {
-    final prefs = await SharedPreferences.getInstance();
-    final budgetStrings = budgets.map((b) => jsonEncode(b.toJson())).toList();
-    await prefs.setStringList('budgets', budgetStrings);
-  }
-
-  void _updateTotals() {
-    totalBudget = budgets.fold(0, (sum, item) => sum + item.total);
-    totalRemaining = budgets.fold(0, (sum, item) => sum + item.remaining);
-    _saveBudgets();
-    setState(() {});
-  }
-
-  void _deleteBudget(Budget budget) {
-    setState(() {
-      budgets.remove(budget);
-      _updateTotals();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    List<Budget> budgets,
+    double totalBudget,
+    double totalRemaining,
+  ) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           "ezBudget",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return CreateBudgetDialog(
-                    budgets: budgets,
-                    refreshBudgetsCallback: _updateTotals,
-                  );
-                },
-              );
-            },
-            icon: const Icon(Icons.add, size: 32),
-          ),
-        ],
       ),
+      floatingActionButton: null,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final bool useWideLayout = constraints.maxWidth > 600;
@@ -96,15 +64,21 @@ class _MainViewState extends State<MainView> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Text(
-                      "Total Budget: \$${totalBudget.toStringAsFixed(2)}",
-                      style: const TextStyle(fontSize: 20),
+                    const Text(
+                      "TOTAL REMAINING BUDGET",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1.2,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "Remaining: \$${totalRemaining.toStringAsFixed(2)}",
+                      "\$${totalRemaining.toStringAsFixed(2)}",
                       style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -112,31 +86,55 @@ class _MainViewState extends State<MainView> {
               Expanded(
                 child: useWideLayout
                     ? GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
+                        padding: const EdgeInsets.all(8.0),
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 250,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
                           childAspectRatio: 1,
                         ),
-                        itemCount: budgets.length,
+                        itemCount: budgets.length + 1,
                         itemBuilder: (context, index) {
+                          // Last item is the "add budget" card
+                          if (index == budgets.length) {
+                            return _buildAddBudgetCard(context);
+                          }
                           return BudgetTile(
+                            key: ValueKey(budgets[index].label),
                             budget: budgets[index],
-                            updateTotalCallback: _updateTotals,
                             useWideLayout: useWideLayout,
-                            onDeleteBudget: _deleteBudget,
+                            onDeleteBudget: (budget) {
+                              ref
+                                  .read(budgetListProvider.notifier)
+                                  .deleteBudget(budget);
+                            },
                           );
                         },
                       )
                     : ListView.builder(
-                        itemCount: budgets.length,
+                        itemCount: budgets.length + 1,
                         itemBuilder: (context, index) {
+                          // Last item is the "add budget" card
+                          if (index == budgets.length) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 8.0),
+                              child: _buildAddBudgetCard(context),
+                            );
+                          }
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16.0, vertical: 8.0),
                             child: BudgetTile(
+                              key: ValueKey(budgets[index].label),
                               budget: budgets[index],
-                              updateTotalCallback: _updateTotals,
                               useWideLayout: useWideLayout,
-                              onDeleteBudget: _deleteBudget,
+                              onDeleteBudget: (budget) {
+                                ref
+                                    .read(budgetListProvider.notifier)
+                                    .deleteBudget(budget);
+                              },
                             ),
                           );
                         },
@@ -145,6 +143,34 @@ class _MainViewState extends State<MainView> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildAddBudgetCard(BuildContext context) {
+    return Card(
+      color: Colors.grey[850],
+      elevation: 0,
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return const CreateBudgetDialog();
+            },
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Icon(
+              Icons.add_circle_outline,
+              size: 36,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
       ),
     );
   }

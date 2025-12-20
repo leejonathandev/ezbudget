@@ -3,29 +3,29 @@
 import 'package:ezbudget/views/spend_view.dart';
 import 'package:flutter/material.dart';
 import 'package:ezbudget/models/budget.dart';
+import 'package:ezbudget/providers/budget_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final NumberFormat currencyFormatter = NumberFormat.simpleCurrency();
 
-class BudgetTile extends StatefulWidget {
+class BudgetTile extends ConsumerStatefulWidget {
   final Budget budget;
-  final Function() updateTotalCallback;
   final bool useWideLayout;
   final Function(Budget) onDeleteBudget;
 
   const BudgetTile({
     super.key,
     required this.budget,
-    required this.updateTotalCallback,
     required this.useWideLayout,
     required this.onDeleteBudget,
   });
 
   @override
-  State<StatefulWidget> createState() => _BudgetTile();
+  ConsumerState<BudgetTile> createState() => _BudgetTile();
 }
 
-class _BudgetTile extends State<BudgetTile> {
+class _BudgetTile extends ConsumerState<BudgetTile> {
   @override
   Widget build(BuildContext context) {
     if (widget.useWideLayout) {
@@ -38,7 +38,6 @@ class _BudgetTile extends State<BudgetTile> {
             MaterialPageRoute(
               builder: (context) => SpendView(
                 selectedBudget: widget.budget,
-                updateTotalCallback: widget.updateTotalCallback,
               ),
             ),
           ),
@@ -54,10 +53,14 @@ class _BudgetTile extends State<BudgetTile> {
                       ListTile(
                         leading: const Icon(Icons.refresh),
                         title: const Text('Reset Budget'),
-                        onTap: () {
+                        onTap: () async {
                           widget.budget.resetBudget();
-                          widget.updateTotalCallback();
-                          Navigator.pop(context);
+                          await ref
+                              .read(budgetListProvider.notifier)
+                              .updateBudget(widget.budget);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
                         },
                       ),
                       ListTile(
@@ -138,7 +141,6 @@ class _BudgetTile extends State<BudgetTile> {
                 MaterialPageRoute(
                   builder: (context) => SpendView(
                     selectedBudget: widget.budget,
-                    updateTotalCallback: widget.updateTotalCallback,
                   ),
                 )),
             onLongPress: () {
@@ -153,10 +155,14 @@ class _BudgetTile extends State<BudgetTile> {
                         ListTile(
                           leading: const Icon(Icons.refresh),
                           title: const Text('Reset Budget'),
-                          onTap: () {
+                          onTap: () async {
                             widget.budget.resetBudget();
-                            widget.updateTotalCallback();
-                            Navigator.pop(context);
+                            await ref
+                                .read(budgetListProvider.notifier)
+                                .updateBudget(widget.budget);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
                           },
                         ),
                         ListTile(
@@ -205,6 +211,5 @@ class _BudgetTile extends State<BudgetTile> {
     setState(() {
       widget.budget.spendMoney(cost);
     });
-    widget.updateTotalCallback();
   }
 }

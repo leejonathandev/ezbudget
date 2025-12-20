@@ -1,20 +1,18 @@
 import 'package:ezbudget/models/budget.dart';
+import 'package:ezbudget/providers/budget_provider.dart';
 import 'package:ezbudget/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CreateBudgetDialog extends StatefulWidget {
-  final List<Budget> budgets;
-  final Function() refreshBudgetsCallback;
-
-  const CreateBudgetDialog(
-      {super.key, required this.budgets, required this.refreshBudgetsCallback});
+class CreateBudgetDialog extends ConsumerStatefulWidget {
+  const CreateBudgetDialog({super.key});
 
   @override
-  State<StatefulWidget> createState() => _CreateBudgetDialogState();
+  ConsumerState<CreateBudgetDialog> createState() => _CreateBudgetDialogState();
 }
 
-class _CreateBudgetDialogState extends State<CreateBudgetDialog> {
+class _CreateBudgetDialogState extends ConsumerState<CreateBudgetDialog> {
   final budgetNameInputController = TextEditingController();
   final budgetAmountInputController = TextEditingController();
 
@@ -89,18 +87,19 @@ class _CreateBudgetDialogState extends State<CreateBudgetDialog> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => {
-                  if (_formKey.currentState!.validate())
-                    {
-                      widget.budgets.add(
-                        Budget(
-                          budgetNameInputController.text,
-                          double.parse(budgetAmountInputController.text),
-                        ),
-                      ),
-                      widget.refreshBudgetsCallback(),
-                      Navigator.pop(context, "create-action")
-                    },
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    final newBudget = Budget(
+                      budgetNameInputController.text,
+                      double.parse(budgetAmountInputController.text),
+                    );
+                    await ref
+                        .read(budgetListProvider.notifier)
+                        .addBudget(newBudget);
+                    if (context.mounted) {
+                      Navigator.pop(context, "create-action");
+                    }
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

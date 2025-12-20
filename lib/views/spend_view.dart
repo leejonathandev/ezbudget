@@ -1,24 +1,24 @@
 import 'package:ezbudget/models/budget.dart';
+import 'package:ezbudget/providers/budget_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:ezbudget/utils/helpers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SpendView extends StatefulWidget {
+class SpendView extends ConsumerStatefulWidget {
   final Budget selectedBudget;
-  final Function() updateTotalCallback;
-
-  @override
-  State<StatefulWidget> createState() => _SpendViewState();
 
   const SpendView({
     super.key,
     required this.selectedBudget,
-    required this.updateTotalCallback,
   });
+
+  @override
+  ConsumerState<SpendView> createState() => _SpendViewState();
 }
 
-class _SpendViewState extends State<SpendView> {
+class _SpendViewState extends ConsumerState<SpendView> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -31,7 +31,7 @@ class _SpendViewState extends State<SpendView> {
     super.dispose();
   }
 
-  void _addDeduction() {
+  void _addDeduction() async {
     if (_formKey.currentState!.validate()) {
       final amount = double.tryParse(_amountController.text);
       final description = _descriptionController.text;
@@ -39,12 +39,15 @@ class _SpendViewState extends State<SpendView> {
       if (amount != null) {
         setState(() {
           widget.selectedBudget.spendMoney(amount, description);
-          widget.updateTotalCallback();
           _amountController.clear();
           _descriptionController.clear();
           // Close the keyboard
           FocusScope.of(context).unfocus();
         });
+        // Update the provider to sync changes
+        await ref
+            .read(budgetListProvider.notifier)
+            .updateBudget(widget.selectedBudget);
       }
     }
   }
@@ -58,23 +61,71 @@ class _SpendViewState extends State<SpendView> {
       appBar: AppBar(
         title: Text(widget.selectedBudget.label),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Part 1: Budget Info and Deduction Form
-            _buildBudgetSummaryAndForm(),
-            const SizedBox(height: 24),
-            // Part 2: Transaction History
-            const Text(
-              'Transaction History',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isLandscape = constraints.maxWidth > 600;
+          return isLandscape ? _buildLandscapeLayout() : _buildPortraitLayout();
+        },
+      ),
+    );
+  }
+
+  Widget _buildPortraitLayout() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Part 1: Budget Info and Deduction Form (Fixed)
+          _buildBudgetSummaryAndForm(),
+          const SizedBox(height: 24),
+          // Part 2: Transaction History (Scrollable)
+          const Text(
+            'Transaction History',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+          Expanded(
+            child: _buildTransactionHistory(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLandscapeLayout() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        children: [
+          // Left side: Budget Summary and Form (centered)
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: SingleChildScrollView(
+                child: _buildBudgetSummaryAndForm(),
+              ),
             ),
-            const Divider(),
-            _buildTransactionHistory(),
-          ],
-        ),
+          ),
+          const SizedBox(width: 24),
+          // Right side: Transaction History (scrollable)
+          Expanded(
+            flex: 1,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Transaction History',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Divider(),
+                Expanded(
+                  child: _buildTransactionHistory(),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -132,7 +183,8 @@ class _SpendViewState extends State<SpendView> {
                   prefixText: r'$',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -152,13 +204,14 @@ class _SpendViewState extends State<SpendView> {
                 icon: const Icon(Icons.add),
                 label: const Text('Add Deduction'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
               ),
             ],
           ),
         ),
-      ], 
+      ],
     );
   }
 
@@ -166,35 +219,31 @@ class _SpendViewState extends State<SpendView> {
     final deductions = widget.selectedBudget.deductions;
 
     if (deductions.isEmpty) {
-      return const Expanded(
-        child: Center(
-          child: Text(
-            'No transactions yet.',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
+      return const Center(
+        child: Text(
+          'No transactions yet.',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
       );
     }
 
-    return Expanded(
-      child: ListView.builder(
-        itemCount: deductions.length,
-        itemBuilder: (context, index) {
-          final deduction = deductions[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 4.0),
-            child: ListTile(
-              title: Text(deduction.description),
-              subtitle: Text(DateFormat.yMMMd().format(deduction.date)),
-              trailing: Text(
-                '- ${currencyFormatter.format(deduction.amount)}',
-                style: const TextStyle(
-                    color: Colors.red, fontWeight: FontWeight.bold),
-              ),
+    return ListView.builder(
+      itemCount: deductions.length,
+      itemBuilder: (context, index) {
+        final deduction = deductions[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4.0),
+          child: ListTile(
+            title: Text(deduction.description),
+            subtitle: Text(DateFormat.yMMMd().format(deduction.date)),
+            trailing: Text(
+              '- ${currencyFormatter.format(deduction.amount)}',
+              style: const TextStyle(
+                  color: Colors.red, fontWeight: FontWeight.bold),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
