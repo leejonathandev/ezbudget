@@ -3,29 +3,54 @@
 import 'package:ezbudget/views/spend_view.dart';
 import 'package:flutter/material.dart';
 import 'package:ezbudget/models/budget.dart';
+import 'package:ezbudget/providers/budget_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final NumberFormat currencyFormatter = NumberFormat.simpleCurrency();
 
-class BudgetTile extends StatefulWidget {
+// Maps stored icon name to material icon data; defaults to category.
+IconData _iconFromName(String name) {
+  const map = {
+    'category': Icons.category,
+    'shopping_cart': Icons.shopping_cart,
+    'local_gas_station': Icons.local_gas_station,
+    'fastfood': Icons.fastfood,
+    'restaurant': Icons.restaurant,
+    'directions_car': Icons.directions_car,
+    'home': Icons.home,
+    'school': Icons.school,
+    'sports_soccer': Icons.sports_soccer,
+    'travel_explore': Icons.travel_explore,
+    'shopping_bag': Icons.shopping_bag,
+    'favorite': Icons.favorite,
+    'fitness_center': Icons.fitness_center,
+    'theaters': Icons.theaters,
+    'music_note': Icons.music_note,
+    'pets': Icons.pets,
+    'photo_camera': Icons.photo_camera,
+    'checkroom': Icons.checkroom,
+  };
+  return map[name] ?? Icons.category;
+}
+
+class BudgetTile extends ConsumerStatefulWidget {
   final Budget budget;
-  final Function() updateTotalCallback;
   final bool useWideLayout;
   final Function(Budget) onDeleteBudget;
 
   const BudgetTile({
     super.key,
     required this.budget,
-    required this.updateTotalCallback,
     required this.useWideLayout,
     required this.onDeleteBudget,
   });
 
   @override
-  State<StatefulWidget> createState() => _BudgetTile();
+  ConsumerState<BudgetTile> createState() => _BudgetTile();
 }
 
-class _BudgetTile extends State<BudgetTile> {
+class _BudgetTile extends ConsumerState<BudgetTile> {
   @override
   Widget build(BuildContext context) {
     if (widget.useWideLayout) {
@@ -38,7 +63,6 @@ class _BudgetTile extends State<BudgetTile> {
             MaterialPageRoute(
               builder: (context) => SpendView(
                 selectedBudget: widget.budget,
-                updateTotalCallback: widget.updateTotalCallback,
               ),
             ),
           ),
@@ -54,17 +78,23 @@ class _BudgetTile extends State<BudgetTile> {
                       ListTile(
                         leading: const Icon(Icons.refresh),
                         title: const Text('Reset Budget'),
-                        onTap: () {
+                        onTap: () async {
                           widget.budget.resetBudget();
-                          widget.updateTotalCallback();
-                          Navigator.pop(context);
+                          await ref
+                              .read(budgetListProvider.notifier)
+                              .updateBudget(widget.budget);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
                         },
                       ),
                       ListTile(
-                        leading: const Icon(Icons.delete, color: Colors.red),
-                        title: const Text(
+                        leading: Icon(Icons.delete,
+                            color: Theme.of(context).colorScheme.error),
+                        title: Text(
                           'Delete Budget',
-                          style: TextStyle(color: Colors.red),
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error),
                         ),
                         onTap: () {
                           widget.onDeleteBudget(widget.budget);
@@ -77,53 +107,64 @@ class _BudgetTile extends State<BudgetTile> {
               },
             );
           },
-          child: Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          widget.budget.label,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              spacing: 6,
+              children: [
+                SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        color: Color.lerp(
+                          const Color(0xFFFFFFFF),
+                          const Color(0xFF45AAED),
+                          widget.budget.getPercentageRemaining(),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          currencyFormatter.format(widget.budget.remaining),
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "of ${currencyFormatter.format(widget.budget.total)}",
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
+                        backgroundColor: Colors.blueGrey,
+                        strokeWidth: 4,
+                        value: widget.budget.getPercentageRemaining(),
+                        strokeCap: StrokeCap.round,
+                      ),
+                      Icon(
+                        _iconFromName(widget.budget.icon),
+                        size: 22,
+                        color: Colors.white,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              LinearProgressIndicator(
-                color: Color.lerp(
-                  const Color(0xFFFFFFFF),
-                  const Color(0xFF45AAED),
-                  widget.budget.getPercentageRemaining(),
+                Expanded(
+                  child: Text(
+                    widget.budget.label,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold, height: 1.1),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                backgroundColor: Colors.blueGrey[700],
-                minHeight: 8,
-                value: widget.budget.getPercentageRemaining(),
-              ),
-            ],
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      currencyFormatter.format(widget.budget.remaining),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      "of ${currencyFormatter.format(widget.budget.total)}",
+                      style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.normal),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -138,7 +179,6 @@ class _BudgetTile extends State<BudgetTile> {
                 MaterialPageRoute(
                   builder: (context) => SpendView(
                     selectedBudget: widget.budget,
-                    updateTotalCallback: widget.updateTotalCallback,
                   ),
                 )),
             onLongPress: () {
@@ -153,17 +193,23 @@ class _BudgetTile extends State<BudgetTile> {
                         ListTile(
                           leading: const Icon(Icons.refresh),
                           title: const Text('Reset Budget'),
-                          onTap: () {
+                          onTap: () async {
                             widget.budget.resetBudget();
-                            widget.updateTotalCallback();
-                            Navigator.pop(context);
+                            await ref
+                                .read(budgetListProvider.notifier)
+                                .updateBudget(widget.budget);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.delete, color: Colors.red),
-                          title: const Text(
+                          leading: Icon(Icons.delete,
+                              color: Theme.of(context).colorScheme.error),
+                          title: Text(
                             'Delete Budget',
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.error),
                           ),
                           onTap: () {
                             widget.onDeleteBudget(widget.budget);
@@ -176,24 +222,65 @@ class _BudgetTile extends State<BudgetTile> {
                 },
               );
             },
-            child: Column(
-              children: [
-                const SizedBox(height: 5),
-                Text(widget.budget.label,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(
-                    " ${currencyFormatter.format(widget.budget.remaining)} / ${currencyFormatter.format(widget.budget.total)} "),
-                const SizedBox(height: 5),
-                LinearProgressIndicator(
-                  color: Color.lerp(
-                      const Color(0xFFFFFFFF),
-                      const Color(0xFF45AAED),
-                      widget.budget.getPercentageRemaining()),
-                  backgroundColor: Colors.blueGrey,
-                  minHeight: 10,
-                  value: widget.budget.getPercentageRemaining(),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                spacing: 6,
+                children: [
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          color: Color.lerp(
+                            const Color(0xFFFFFFFF),
+                            const Color(0xFF45AAED),
+                            widget.budget.getPercentageRemaining(),
+                          ),
+                          backgroundColor: Colors.blueGrey,
+                          strokeWidth: 4,
+                          value: widget.budget.getPercentageRemaining(),
+                          strokeCap: StrokeCap.round,
+                        ),
+                        Icon(
+                          _iconFromName(widget.budget.icon),
+                          size: 22,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      widget.budget.label,
+                      style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          height: 1.1),
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        currencyFormatter.format(widget.budget.remaining),
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "of ${currencyFormatter.format(widget.budget.total)}",
+                        style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.normal),
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -205,6 +292,5 @@ class _BudgetTile extends State<BudgetTile> {
     setState(() {
       widget.budget.spendMoney(cost);
     });
-    widget.updateTotalCallback();
   }
 }
