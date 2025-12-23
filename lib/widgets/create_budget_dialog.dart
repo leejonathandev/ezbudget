@@ -5,6 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// Available icon options the user can pick.
+const Map<String, IconData> iconOptions = {
+  'category': Icons.category,
+  'shopping_cart': Icons.shopping_cart,
+  'local_gas_station': Icons.local_gas_station,
+  'fastfood': Icons.fastfood,
+  'restaurant': Icons.restaurant,
+  'directions_car': Icons.directions_car,
+  'home': Icons.home,
+  'school': Icons.school,
+  'sports_soccer': Icons.sports_soccer,
+  'travel_explore': Icons.travel_explore,
+  'shopping_bag': Icons.shopping_bag,
+  'favorite': Icons.favorite,
+  'fitness_center': Icons.fitness_center,
+  'theaters': Icons.theaters,
+  'music_note': Icons.music_note,
+  'pets': Icons.pets,
+  'photo_camera': Icons.photo_camera,
+  'checkroom': Icons.checkroom,
+};
+
 class CreateBudgetDialog extends ConsumerStatefulWidget {
   const CreateBudgetDialog({super.key});
 
@@ -17,6 +39,7 @@ class _CreateBudgetDialogState extends ConsumerState<CreateBudgetDialog> {
   final budgetAmountInputController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
+  String selectedIcon = 'category';
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +107,56 @@ class _CreateBudgetDialogState extends ConsumerState<CreateBudgetDialog> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 24),
+            // Icon picker
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Select Icon',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: iconOptions.entries.map((entry) {
+                final isSelected = selectedIcon == entry.key;
+                return InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () {
+                    setState(() {
+                      selectedIcon = entry.key;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.outline,
+                        width: isSelected ? 2 : 1,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : Theme.of(context).colorScheme.surface,
+                    ),
+                    child: Icon(
+                      entry.value,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -92,6 +165,9 @@ class _CreateBudgetDialogState extends ConsumerState<CreateBudgetDialog> {
                     final newBudget = Budget(
                       budgetNameInputController.text,
                       double.parse(budgetAmountInputController.text),
+                      null,
+                      null,
+                      selectedIcon,
                     );
                     await ref
                         .read(budgetListProvider.notifier)

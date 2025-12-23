@@ -16,14 +16,19 @@ class Budget {
   double total;
   List<Deduction> deductions;
 
+  /// Icon name identifier (e.g., 'shopping_cart'). Defaults to 'category'.
+  String icon;
+
   DateTime resetDate;
   ResetInterval resetInterval;
 
-  Budget(this.label, this.total, [double? remaining, List<Deduction>? deductions])
+  Budget(this.label, this.total,
+      [double? remaining, List<Deduction>? deductions, String? icon])
       : remaining = remaining ?? total,
         deductions = deductions ?? [],
         resetDate = DateTime(DateTime.now().year, DateTime.now().month + 1),
-        resetInterval = ResetInterval.monthly;
+        resetInterval = ResetInterval.monthly,
+        icon = icon ?? 'category';
 
   void resetBudget() {
     remaining = total;
@@ -32,7 +37,8 @@ class Budget {
 
   void spendMoney(double amount, [String? description]) {
     remaining -= amount;
-    deductions.add(Deduction(description ?? "Unnamed Deduction", amount, DateTime.now()));
+    deductions.add(
+        Deduction(description ?? "Unnamed Deduction", amount, DateTime.now()));
   }
 
   double getPercentageRemaining() {
@@ -65,10 +71,12 @@ class Budget {
         resetDate = DateTime(resetDate.year, resetDate.month + 1);
         break;
       case ResetInterval.weekly:
-        resetDate = DateTime(resetDate.year, resetDate.month, resetDate.day + 7);
+        resetDate =
+            DateTime(resetDate.year, resetDate.month, resetDate.day + 7);
         break;
       case ResetInterval.daily:
-        resetDate = DateTime(resetDate.year, resetDate.month, resetDate.day + 1);
+        resetDate =
+            DateTime(resetDate.year, resetDate.month, resetDate.day + 1);
         break;
     }
   }
@@ -81,7 +89,8 @@ class Budget {
             .map((d) => Deduction.fromJson(d))
             .toList(),
         resetDate = DateTime.parse(json['resetDate'] as String),
-        resetInterval = ResetInterval.values[json['resetInterval'] as int];
+        resetInterval = ResetInterval.values[json['resetInterval'] as int],
+        icon = (json['icon'] as String?) ?? 'category';
 
   Map<String, dynamic> toJson() => {
         'label': label,
@@ -90,5 +99,6 @@ class Budget {
         'deductions': deductions.map((d) => d.toJson()).toList(),
         'resetDate': resetDate.toIso8601String(),
         'resetInterval': resetInterval.index,
+        'icon': icon,
       };
 }
