@@ -13,7 +13,8 @@ class MainView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bool useWideLayout = MediaQuery.of(context).size.width > 600;
+    final bool usePortraitLayout =
+        MediaQuery.of(context).orientation == Orientation.portrait;
     final budgetsAsync = ref.watch(budgetListProvider);
     final totalBudget = ref.watch(totalBudgetProvider);
     final totalRemaining = ref.watch(totalRemainingProvider);
@@ -25,7 +26,7 @@ class MainView extends ConsumerWidget {
         budgets,
         totalBudget,
         totalRemaining,
-        useWideLayout,
+        usePortraitLayout,
       ),
       loading: () => Scaffold(
         appBar: AppBar(
@@ -54,10 +55,10 @@ class MainView extends ConsumerWidget {
     List<Budget> budgets,
     double totalBudget,
     double totalRemaining,
-    bool useWideLayout,
+    bool usePortraitLayout,
   ) {
     return Scaffold(
-      appBar: useWideLayout
+      appBar: usePortraitLayout
           ? null
           : AppBar(
               title: const Text(
@@ -69,7 +70,71 @@ class MainView extends ConsumerWidget {
       body: LayoutBuilder(
         builder: (context, constraints) {
           // keep consistency with MediaQuery-based decision
-          if (useWideLayout) {
+          if (usePortraitLayout) {
+            // Portrait: keep existing list layout
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "TOTAL REMAINING BUDGET",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.1,
+                        ),
+                      ),
+                      Text(
+                        currencyFormatter.format(totalRemaining),
+                        style: const TextStyle(
+                          fontSize: 55,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: budgets.length + 1,
+                    itemBuilder: (context, index) {
+                      // Last item is the "add budget" card
+                      if (index == budgets.length) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 8.0,
+                          ),
+                          child: _buildAddBudgetCard(context),
+                        );
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
+                        ),
+                        child: BudgetTile(
+                          key: ValueKey(budgets[index].label),
+                          budget: budgets[index],
+                          useWideLayout: usePortraitLayout,
+                          onDeleteBudget: (budget) {
+                            ref
+                                .read(budgetListProvider.notifier)
+                                .deleteBudget(budget);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          } else {
             return SafeArea(
               child: SizedBox.expand(
                 child: Row(
@@ -154,7 +219,7 @@ class MainView extends ConsumerWidget {
                               child: BudgetTile(
                                 key: ValueKey(budgets[index].label),
                                 budget: budgets[index],
-                                useWideLayout: useWideLayout,
+                                useWideLayout: usePortraitLayout,
                                 onDeleteBudget: (budget) {
                                   ref
                                       .read(budgetListProvider.notifier)
@@ -171,70 +236,6 @@ class MainView extends ConsumerWidget {
               ),
             );
           }
-
-          // Portrait: keep existing list layout
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Text(
-                      "TOTAL REMAINING BUDGET",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                    Text(
-                      currencyFormatter.format(totalRemaining),
-                      style: const TextStyle(
-                        fontSize: 55,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: budgets.length + 1,
-                  itemBuilder: (context, index) {
-                    // Last item is the "add budget" card
-                    if (index == budgets.length) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 8.0,
-                        ),
-                        child: _buildAddBudgetCard(context),
-                      );
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
-                      child: BudgetTile(
-                        key: ValueKey(budgets[index].label),
-                        budget: budgets[index],
-                        useWideLayout: useWideLayout,
-                        onDeleteBudget: (budget) {
-                          ref
-                              .read(budgetListProvider.notifier)
-                              .deleteBudget(budget);
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
         },
       ),
     );
