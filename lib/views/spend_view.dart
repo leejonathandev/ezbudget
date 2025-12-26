@@ -61,11 +61,18 @@ class _SpendViewState extends ConsumerState<SpendView> {
       appBar: AppBar(
         title: Text(widget.selectedBudget.label),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isLandscape = constraints.maxWidth > 600;
-          return isLandscape ? _buildLandscapeLayout() : _buildPortraitLayout();
-        },
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isLandscape = constraints.maxWidth > 600;
+              return isLandscape
+                  ? _buildLandscapeLayout()
+                  : _buildPortraitLayout();
+            },
+          ),
+        ),
       ),
     );
   }
