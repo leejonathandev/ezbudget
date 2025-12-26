@@ -1,10 +1,10 @@
-import 'package:ezbudget/models/budget.dart';
-import 'package:ezbudget/providers/budget_provider.dart';
-import 'package:ezbudget/widgets/create_budget_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:ezbudget/widgets/budget_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:ezbudget/models/budget.dart';
+import 'package:ezbudget/providers/budget_provider.dart';
+import 'package:ezbudget/widgets/budget_tile.dart';
+import 'package:ezbudget/widgets/create_budget_dialog.dart';
 
 final NumberFormat currencyFormatter = NumberFormat.simpleCurrency();
 

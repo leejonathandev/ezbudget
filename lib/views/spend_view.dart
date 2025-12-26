@@ -1,10 +1,10 @@
-import 'package:ezbudget/models/budget.dart';
-import 'package:ezbudget/providers/budget_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
-import 'package:ezbudget/utils/helpers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:ezbudget/models/budget.dart';
+import 'package:ezbudget/providers/budget_provider.dart';
+import 'package:ezbudget/utils/helpers.dart';
 
 class SpendView extends ConsumerStatefulWidget {
   final Budget selectedBudget;
