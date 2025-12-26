@@ -33,43 +33,6 @@ class _SpendViewState extends ConsumerState<SpendView> {
     super.dispose();
   }
 
-  void _addDeduction() async {
-    if (_formKey.currentState!.validate()) {
-      final amount = double.tryParse(_amountController.text);
-      final description = _descriptionController.text;
-
-      if (amount != null) {
-        setState(() {
-          widget.selectedBudget.spendMoney(amount, description, _selectedDate);
-          _selectedDate = DateTime.now();
-          _amountController.clear();
-          _descriptionController.clear();
-          // Close the keyboard
-          FocusScope.of(context).unfocus();
-        });
-        // Update the provider to sync changes
-        await ref
-            .read(budgetListProvider.notifier)
-            .updateBudget(widget.selectedBudget);
-      }
-    }
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 3650)),
-      lastDate: DateTime.now().add(const Duration(days: 3650)),
-    );
-
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // Sort deductions by date, newest first
@@ -235,6 +198,21 @@ class _SpendViewState extends ConsumerState<SpendView> {
     );
   }
 
+  Widget _buildDateSelector() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _pickDate,
+        icon: const Icon(Icons.date_range),
+        label: Text(_dateFormatter.format(_selectedDate)),
+        style: OutlinedButton.styleFrom(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTransactionHistory() {
     final deductions = widget.selectedBudget.deductions;
 
@@ -269,18 +247,40 @@ class _SpendViewState extends ConsumerState<SpendView> {
     );
   }
 
-  Widget _buildDateSelector() {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: _pickDate,
-        icon: const Icon(Icons.date_range),
-        label: Text(_dateFormatter.format(_selectedDate)),
-        style: OutlinedButton.styleFrom(
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        ),
-      ),
+  void _addDeduction() async {
+    if (_formKey.currentState!.validate()) {
+      final amount = double.tryParse(_amountController.text);
+      final description = _descriptionController.text;
+
+      if (amount != null) {
+        setState(() {
+          widget.selectedBudget.spendMoney(amount, description, _selectedDate);
+          _selectedDate = DateTime.now();
+          _amountController.clear();
+          _descriptionController.clear();
+          // Close the keyboard
+          FocusScope.of(context).unfocus();
+        });
+        // Update the provider to sync changes
+        await ref
+            .read(budgetListProvider.notifier)
+            .updateBudget(widget.selectedBudget);
+      }
+    }
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 3650)),
+      lastDate: DateTime.now().add(const Duration(days: 3650)),
     );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
   }
 }
