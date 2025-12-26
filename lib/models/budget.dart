@@ -35,10 +35,10 @@ class Budget {
     deductions = [];
   }
 
-  void spendMoney(double amount, [String? description]) {
+  void spendMoney(double amount, [String? description, DateTime? date]) {
     remaining -= amount;
-    deductions.add(
-        Deduction(description ?? "Unnamed Deduction", amount, DateTime.now()));
+    deductions.add(Deduction(
+        description ?? "Unnamed Deduction", amount, date ?? DateTime.now()));
   }
 
   double getPercentageRemaining() {

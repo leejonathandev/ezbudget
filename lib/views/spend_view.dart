@@ -23,6 +23,8 @@ class _SpendViewState extends ConsumerState<SpendView> {
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   final currencyFormatter = NumberFormat.simpleCurrency();
+  final _dateFormatter = DateFormat.yMMMd();
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void dispose() {
@@ -38,7 +40,8 @@ class _SpendViewState extends ConsumerState<SpendView> {
 
       if (amount != null) {
         setState(() {
-          widget.selectedBudget.spendMoney(amount, description);
+          widget.selectedBudget.spendMoney(amount, description, _selectedDate);
+          _selectedDate = DateTime.now();
           _amountController.clear();
           _descriptionController.clear();
           // Close the keyboard
@@ -49,6 +52,21 @@ class _SpendViewState extends ConsumerState<SpendView> {
             .read(budgetListProvider.notifier)
             .updateBudget(widget.selectedBudget);
       }
+    }
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 3650)),
+      lastDate: DateTime.now().add(const Duration(days: 3650)),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
     }
   }
 
@@ -199,6 +217,8 @@ class _SpendViewState extends ConsumerState<SpendView> {
                 },
               ),
               const SizedBox(height: 16),
+              _buildDateSelector(),
+              const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: _addDeduction,
                 icon: const Icon(Icons.add),
@@ -236,7 +256,7 @@ class _SpendViewState extends ConsumerState<SpendView> {
           margin: const EdgeInsets.symmetric(vertical: 4.0),
           child: ListTile(
             title: Text(deduction.description),
-            subtitle: Text(DateFormat.yMMMd().format(deduction.date)),
+            subtitle: Text(_dateFormatter.format(deduction.date)),
             trailing: Text(
               '- ${currencyFormatter.format(deduction.amount)}',
               style: TextStyle(
@@ -246,6 +266,21 @@ class _SpendViewState extends ConsumerState<SpendView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildDateSelector() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _pickDate,
+        icon: const Icon(Icons.date_range),
+        label: Text(_dateFormatter.format(_selectedDate)),
+        style: OutlinedButton.styleFrom(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        ),
+      ),
     );
   }
 }
