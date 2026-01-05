@@ -40,6 +40,20 @@ class BudgetNotifier extends Notifier<AsyncValue<List<Budget>>> {
       if (budgetStrings != null) {
         budgets =
             budgetStrings.map((b) => Budget.fromJson(jsonDecode(b))).toList();
+
+        // Check and reset budgets that have passed their reset date
+        bool needsSave = false;
+        for (var budget in budgets) {
+          if (DateTime.now().isAfter(budget.resetDate)) {
+            budget.resetBudget();
+            budget.setResetDate();
+            needsSave = true;
+          }
+        }
+
+        if (needsSave) {
+          await _saveBudgets(budgets);
+        }
       } else {
         budgets = [
           Budget("Groceries", 200),

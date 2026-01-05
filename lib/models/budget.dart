@@ -23,12 +23,34 @@ class Budget {
   ResetInterval resetInterval;
 
   Budget(this.label, this.total,
-      [double? remaining, List<Deduction>? deductions, String? icon])
+      [double? remaining,
+      List<Deduction>? deductions,
+      String? icon,
+      ResetInterval? resetInterval])
       : remaining = remaining ?? total,
         deductions = deductions ?? [],
-        resetDate = DateTime(DateTime.now().year, DateTime.now().month + 1),
-        resetInterval = ResetInterval.monthly,
+        resetInterval = resetInterval ?? ResetInterval.monthly,
+        resetDate =
+            _calculateInitialResetDate(resetInterval ?? ResetInterval.monthly),
         icon = icon ?? 'category';
+
+  static DateTime _calculateInitialResetDate(ResetInterval interval) {
+    final now = DateTime.now();
+    switch (interval) {
+      case ResetInterval.weekly:
+        // Reset on next Monday
+        final daysUntilMonday = (DateTime.monday - now.weekday + 7) % 7;
+        final nextMonday = daysUntilMonday == 0 ? 7 : daysUntilMonday;
+        return DateTime(now.year, now.month, now.day + nextMonday);
+      case ResetInterval.monthly:
+        // Reset on first of next month
+        return DateTime(now.year, now.month + 1, 1);
+      case ResetInterval.yearly:
+        return DateTime(now.year + 1, 1, 1);
+      case ResetInterval.daily:
+        return DateTime(now.year, now.month, now.day + 1);
+    }
+  }
 
   void resetBudget() {
     remaining = total;
