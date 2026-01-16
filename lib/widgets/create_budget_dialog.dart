@@ -40,6 +40,7 @@ class _CreateBudgetDialogState extends ConsumerState<CreateBudgetDialog> {
 
   final _formKey = GlobalKey<FormState>();
   String selectedIcon = 'category';
+  ResetInterval selectedInterval = ResetInterval.monthly;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +108,36 @@ class _CreateBudgetDialogState extends ConsumerState<CreateBudgetDialog> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 24),
+            // Reset interval selector
+            DropdownButtonFormField<ResetInterval>(
+              value: selectedInterval,
+              decoration: InputDecoration(
+                labelText: "Reset Frequency",
+                border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surface,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: ResetInterval.weekly,
+                  child: Text('Weekly'),
+                ),
+                DropdownMenuItem(
+                  value: ResetInterval.monthly,
+                  child: Text('Monthly'),
+                ),
+              ],
+              onChanged: (ResetInterval? value) {
+                if (value != null) {
+                  setState(() {
+                    selectedInterval = value;
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 24),
             // Icon picker
             Align(
               alignment: Alignment.centerLeft,
@@ -168,6 +199,7 @@ class _CreateBudgetDialogState extends ConsumerState<CreateBudgetDialog> {
                       null,
                       null,
                       selectedIcon,
+                      selectedInterval,
                     );
                     await ref
                         .read(budgetListProvider.notifier)

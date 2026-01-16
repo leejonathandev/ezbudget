@@ -146,6 +146,8 @@ class _BudgetTile extends ConsumerState<BudgetTile> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                _buildDaysRemainingChip(),
+                const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -262,6 +264,8 @@ class _BudgetTile extends ConsumerState<BudgetTile> {
                           height: 1.1),
                     ),
                   ),
+                  _buildDaysRemainingChip(),
+                  const SizedBox(width: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -292,5 +296,24 @@ class _BudgetTile extends ConsumerState<BudgetTile> {
     setState(() {
       widget.budget.spendMoney(cost);
     });
+  }
+
+  Widget _buildDaysRemainingChip() {
+    final daysRemaining = widget.budget.getTimeRemaining().inDays;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.white24,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        '${daysRemaining}d',
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 }
